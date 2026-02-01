@@ -30,16 +30,29 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-INSTALLED_APPS = [
+SHARED_APPS = [
     "django.contrib.admin",
+    "customers",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_tenants",
 ]
 
+
+TENANT_APPS = [
+    "tasks.task_manager",
+    "tasks.users",
+    "tasks.core",
+]
+
+INSTALLED_APPS = list(SHARED_APPS) + [
+    app for app in TENANT_APPS if app not in SHARED_APPS
+]
 MIDDLEWARE = [
+    "django_tenants.middleware.main.TenantMainMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -75,11 +88,17 @@ WSGI_APPLICATION = "AI_Manager.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django_tenants.postgresql_backend",
+        "NAME": "ai_task_manager_db",
+        "USER": "ai_postgres_task",
+        "PASSWORD": "postgres123",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
 
+
+DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -121,3 +140,15 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+TENANT_MODEL = "customers.Client"
+TENANT_DOMAIN_MODEL = "customers.Domain"
+
+# Use separate URLconfs: public schema (e.g. localhost) vs tenant schemas
+PUBLIC_SCHEMA_URLCONF = "AI_Manager.urls_public"
+
+# When hostname has no Domain (e.g. plain localhost), use public URLs instead of 404
+SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
+
+
+AUTH_USER_MODEL = "users.User"
