@@ -7,7 +7,7 @@ The goal of this project is to design and implement **real-world backend systems
 ---
 
 ### 🎯 Project Objective
-To build a **scalable, multi-tenant SaaS platform** with:
+To build a **scalable, multi-tenant SaaS platform** with:-  
 - Secure authentication & authorization  
 - Organization-level data isolation  
 - Async background processing  
